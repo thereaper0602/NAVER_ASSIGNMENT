@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragOverEvent, type DragEndEvent, rectIntersection } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragOverEvent, type DragEndEvent, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useKanban } from '../contexts/KanbanContext';
 import type { Task } from '../types/kanban';

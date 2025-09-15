@@ -6,9 +6,10 @@ import { useKanban } from '../contexts/KanbanContext';
 
 interface TaskCardProps {
   task: Task;
+  minimal?: boolean;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
+const TaskCard = React.memo(({ task, minimal = false }: TaskCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [taskContent, setTaskContent] = useState(task.content);
   const { updateTask, deleteTask } = useKanban();
@@ -28,6 +29,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  if (minimal) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="bg-slate-700/80 backdrop-blur-sm border border-slate-600/50 rounded-lg p-3 cursor-grabbing"
+      >
+        <p className="text-sm text-white font-medium line-clamp-2">{task.content}</p>
+      </div>
+    );
+  }
 
   const handleUpdateTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +175,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
       )}
     </div>
   );
-};
-
+});
+TaskCard.displayName = 'TaskCard';
 export default TaskCard;

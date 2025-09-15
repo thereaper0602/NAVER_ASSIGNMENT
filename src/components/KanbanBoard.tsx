@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragOverEvent, type DragEndEvent } from '@dnd-kit/core';
+import React, { useMemo, useState } from 'react';
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, type DragStartEvent, type DragOverEvent, type DragEndEvent, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useKanban } from '../contexts/KanbanContext';
 import type { Task } from '../types/kanban';
@@ -13,12 +13,12 @@ const KanbanBoard: React.FC = () => {
     const [activeTask, setActiveTask] = useState<Task | null>(null);
     const [newColumnTitle, setNewColumnTitle] = useState('');
     const [isAddingColumn, setIsAddingColumn] = useState(false);
-    const { searchTerm, setSearchTerm, filteredColumns } = useSearch(columns); 
+    const { searchTerm, setSearchTerm, filteredColumns } = useSearch(columns);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8,
+                distance: 10,
             },
         })
     );
@@ -251,7 +251,7 @@ const KanbanBoard: React.FC = () => {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
-                collisionDetection={closestCorners}
+                collisionDetection={rectIntersection}
             >
                 <div className="flex space-x-6 overflow-x-auto pb-6 min-h-[700px]">
                     <SortableContext items={filteredColumns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
@@ -316,8 +316,8 @@ const KanbanBoard: React.FC = () => {
 
                 <DragOverlay>
                     {activeTask ? (
-                        <div className="rotate-3 shadow-2xl">
-                            <TaskCard task={activeTask} />
+                        <div className="rotate-2 shadow-2xl opacity-80">
+                            <TaskCard task={activeTask} minimal={true} /> {/* Thêm minimal prop */}
                         </div>
                     ) : null}
                 </DragOverlay>

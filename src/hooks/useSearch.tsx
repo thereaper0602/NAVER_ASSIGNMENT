@@ -1,34 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Column } from "../types/kanban";
+
+function useDebounce(value: string, delay: number) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+}
 
 const useSearch = (columns: Column[]) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredColumns, setFilteredColumns] = useState<Column[]>(columns);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    const filterTasks = (term: string) => {
-        if (!term.trim()) {
-            setFilteredColumns(columns);
-            return;
+    const filteredColumns = useMemo(() => {
+        if (!debouncedSearchTerm.trim()) {
+            return columns;
         }
-        
-        const filtered = columns.map(col => ({
-            ...col,
-            tasks: col.tasks.filter(task =>
-                task.content.toLowerCase().includes(term.toLowerCase())
+
+        return columns.map(column => ({
+            ...column,
+            tasks: column.tasks.filter(task =>
+                task.content.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
             )
         }));
-        
-        setFilteredColumns(filtered);
+    }, [columns, debouncedSearchTerm]);
+
+    return {
+        searchTerm,
+        setSearchTerm,
+        filteredColumns
     };
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            filterTasks(searchTerm);
-        }, 1000);
-        return () => clearTimeout(timer); 
-    },[searchTerm, columns]);
-
-    return { searchTerm, setSearchTerm, filteredColumns };
 };
 
 export default useSearch;

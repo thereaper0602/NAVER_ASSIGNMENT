@@ -9,13 +9,13 @@ interface TaskColumnProps {
   column: Column;
 }
 
-const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
+const TaskColumn = React.memo(({ column }: TaskColumnProps) => {
   const [newTaskContent, setNewTaskContent] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.title);
   const { addTask, updateColumn, deleteColumn } = useKanban();
-  
+
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });
@@ -43,7 +43,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
-    
+
     const colors = [
       { icon: '📋', color: 'from-blue-600 to-blue-700', borderColor: 'border-blue-500/30', textColor: 'text-blue-300' },
       { icon: '⚡', color: 'from-purple-600 to-purple-700', borderColor: 'border-purple-500/30', textColor: 'text-purple-300' },
@@ -54,7 +54,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
       { icon: '�', color: 'from-indigo-600 to-indigo-700', borderColor: 'border-indigo-500/30', textColor: 'text-indigo-300' },
       { icon: '✨', color: 'from-pink-600 to-pink-700', borderColor: 'border-pink-500/30', textColor: 'text-pink-300' }
     ];
-    
+
     const colorIndex = Math.abs(hash) % colors.length;
     return {
       ...colors[colorIndex],
@@ -72,11 +72,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
 
   return (
     <div className="flex-shrink-0 w-80 h-fit min-h-[600px]">
-      <div className={`bg-slate-800/50 backdrop-blur-sm border rounded-xl overflow-hidden transition-all duration-200 h-full flex flex-col ${
-        isOver 
-          ? 'border-blue-400/70 shadow-lg shadow-blue-500/20 bg-slate-700/60' 
+      <div className={`bg-slate-800/50 backdrop-blur-sm border rounded-xl overflow-hidden transition-all duration-200 h-full flex flex-col ${isOver
+          ? 'border-blue-400/70 shadow-lg shadow-blue-500/20 bg-slate-700/60'
           : 'border-slate-600/50'
-      }`}>
+        }`}>
         {/* Column Header */}
         <div className={`bg-gradient-to-r ${config.color} p-4 border-b ${config.borderColor}`}>
           <div className="flex items-center justify-between mb-2">
@@ -96,10 +95,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
               <div className="flex items-center space-x-3 flex-1">
                 <span className="text-xl">{config.icon}</span>
                 <div>
-                  <h3 
+                  <h3
                     className={`font-semibold text-lg ${config.textColor} cursor-pointer hover:text-white transition-colors`}
                     onClick={() => {
-                      if(column.title!== 'Todo' && column.title !== 'In progress' && column.title !== 'Complete'){
+                      if (column.title !== 'Todo' && column.title !== 'In progress' && column.title !== 'Complete') {
                         setIsEditing(true)
                       }
                     }}
@@ -110,14 +109,14 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
                 </div>
               </div>
             )}
-            
+
             {/* Column Actions */}
             <div className="flex items-center space-x-1">
               <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium">
                 {column.tasks.length}
               </span>
-              {column.title!== 'Todo' && column.title !== 'In progress' && column.title !== 'Complete' && (
-                  <button
+              {column.title !== 'Todo' && column.title !== 'In progress' && column.title !== 'Complete' && (
+                <button
                   onClick={handleDeleteColumn}
                   className="p-1 text-white/60 hover:text-red-300 transition-colors"
                   title="Delete column"
@@ -132,18 +131,27 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
         </div>
 
         {/* Column Content */}
-        <div 
+        <div
           ref={setNodeRef}
           className="p-4 flex-1 min-h-[500px]"
         >
           {/* Tasks Container */}
           <div className="space-y-3 min-h-full">
             <SortableContext items={column.tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-              {column.tasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
+              <div className="space-y-3 min-h-[400px]">
+                {column.tasks.map(task => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+
+                {/* Drop zone ở cuối cột - QUAN TRỌNG */}
+                <div
+                  className="h-8 w-full border-2 border-dashed border-transparent rounded-lg transition-colors"
+                  data-column-id={column.id}
+                  style={{ minHeight: '32px' }}
+                />
+              </div>
             </SortableContext>
-            
+
             {/* Drop Zone Indicator */}
             <div className="flex-1 min-h-[200px] flex items-center justify-center">
               {isOver && (
@@ -154,7 +162,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
                   </div>
                 </div>
               )}
-              
+
               {column.tasks.length === 0 && !isAddingTask && !isOver && (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                   <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mb-3">
@@ -218,6 +226,6 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ column }) => {
       </div>
     </div>
   );
-};
-
+});
+TaskColumn.displayName = 'TaskColumn';
 export default TaskColumn;
